@@ -14,18 +14,18 @@ conn = pika.BlockingConnection(parameters=para)
 #创建频道
 channel = conn.channel()
 #创建队列
-channel.queue_declare(queue='hello_q')
+#申明durable表示要求持久化
+channel.queue_declare(queue='hello_q_durable',durable=True)
+#持久化需要使用delivery_mode=2
+para_dur = pika.BasicProperties(delivery_mode=2)
 #输入想要传输的内容
 a = 1
-while a == 1:
-    #print('please input u r word:')
-    print('data gogogo!')
-    msg = input()
-    #写队列
-    if msg == 'exit':
-        a = 0
-    else:
-        channel.basic_publish(exchange='',routing_key='hello_q',body=msg)
+msg = 'k'
+for a in range(100):
+    msg = msg+'k'
+    channel.basic_publish(exchange='',routing_key='hello_q_durable',body=msg,properties=para_dur)
+    print(a)
+
 #输出状态
 print('========队列开始========')
 conn.close()
