@@ -2,6 +2,7 @@ import pika
 import sys
 
 print('========生产者========')
+print('========路由方式========')
 #配置
 #注意，不加用户会403错误
 #注意，需要添加MQ权限，不加会503错误
@@ -13,19 +14,19 @@ para = pika.ConnectionParameters(host='10.62.24.70',credentials=crea,heartbeat_i
 conn = pika.BlockingConnection(parameters=para)
 #创建频道
 channel = conn.channel()
-#此处由消费端生成随机队列，利用绑定进行
- #创建队列
- #申明durable表示要求持久化
- #channel.queue_declare(queue='hello_q_durable_e2',durable=True)
- #持久化需要使用delivery_mode=2
 para_dur = pika.BasicProperties(delivery_mode=2)
-exc_name = 'TEST_EXCHANGE'
+exc_name = 'TEST_EXCHANGE_ROUTER'
 #输入想要传输的内容
 a = 1
 msg = 'k'
+rt_key_1 = 'rk1'
+rt_key_2 = 'rk2'
 for a in range(100):
     msg = msg+'k'
-    channel.basic_publish(exchange=exc_name,routing_key='hello_q_durable',body=msg,properties=para_dur)
+    if a%2 == 0:
+        channel.basic_publish(exchange=exc_name,routing_key=rt_key_1,body=msg,properties=para_dur)
+    else:
+        channel.basic_publish(exchange=exc_name,routing_key=rt_key_2,body=msg,properties=para_dur)
     print(a)
 
 #输出状态
